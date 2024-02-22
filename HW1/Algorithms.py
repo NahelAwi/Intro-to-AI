@@ -12,19 +12,23 @@ class Node():
         self.actionsList = []
         self.totalCost = 0
         
-    def expand(self, d:dict, env: DragonBallEnv) -> list['Node']:
-        if(d == None):
-            return []
-        for a in d.keys():
-            env.set_state(self.state)
-            if(d[a] != (None, None, None)):# and d[a][0] != (None,False,False)):
-                state , cost , termiated = env.step(a)
-                NewNode = Node(state,self)
-                NewNode.totalCost = self.totalCost + cost
-                NewNode.actionsList.extend(self.actionsList)
-                NewNode.actionsList.append(a)
-                
-                self.successors.append(NewNode)
+        
+    def expand(self, env: DragonBallEnv) -> list['Node']:
+        nA = 4
+        for a in range(nA):
+            env.set_state_2(self.state)
+            if(env.succ(self.state)[a] == (None,None,None)):
+                continue
+            state , cost , termiated = env.step(a)
+            if termiated and (state[1] == False or state[2] == False):
+                continue
+            NewNode = Node(state,self)
+            NewNode.totalCost = self.totalCost + cost
+            NewNode.actionsList.extend(self.actionsList)
+            NewNode.actionsList.append(a)
+            
+            self.successors.append(NewNode)
+
         return self.successors
         
 
@@ -33,9 +37,8 @@ class BFSAgent():
         self.Open = []
         self.Close = []
         self.nodesExpanded = 0
-        #self.totalCost = 0
-        #self.actions = []
 
+    
     def search(self, env: DragonBallEnv) -> Tuple[List[int], float, int]:
         n = Node(env.get_initial_state())
         if(env.is_final_state(n.state)):
@@ -44,13 +47,13 @@ class BFSAgent():
         self.Close.clear()
         self.Open.append(n)
         while len(self.Open) != 0:
-            n = self.Open.pop()
+            n = self.Open.pop(0)
             self.Close.append(n.state)
-            for child in n.expand(env.succ(n.state),env):
-                self.nodesExpanded += 1
+            for child in n.expand(env):
                 if (child.state not in self.Close) and (child not in self.Open):
                     if env.is_final_state(child.state):
                         return (child.actionsList , child.totalCost ,self.nodesExpanded)
+                    self.nodesExpanded += 1
                     self.Open.append(child)
         return ([],-1,self.nodesExpanded)#Failure
 
