@@ -10,13 +10,17 @@ class Node():
         self.parent = parent
         self.successors = []
         self.actionsList = []
+        self.totalCost = 0
         
-    def expand(self, d:dict) -> list['Node']:
+    def expand(self, d:dict, env: DragonBallEnv) -> list['Node']:
         if(d == None):
             return []
         for a in d.keys():
+            env.set_state(self.state)
             if(d[a] != (None, None, None)):# and d[a][0] != (None,False,False)):
-                NewNode = Node(d[a][0],self)
+                state , cost , termiated = env.step(a)
+                NewNode = Node(state,self)
+                NewNode.totalCost = self.totalCost + cost
                 NewNode.actionsList.extend(self.actionsList)
                 NewNode.actionsList.append(a)
                 
@@ -29,7 +33,7 @@ class BFSAgent():
         self.Open = []
         self.Close = []
         self.nodesExpanded = 0
-        self.totalCost = 0
+        #self.totalCost = 0
         #self.actions = []
 
     def search(self, env: DragonBallEnv) -> Tuple[List[int], float, int]:
@@ -42,11 +46,11 @@ class BFSAgent():
         while len(self.Open) != 0:
             n = self.Open.pop()
             self.Close.append(n.state)
-            for child in n.expand(env.succ(n.state)):
+            for child in n.expand(env.succ(n.state),env):
                 self.nodesExpanded += 1
                 if (child.state not in self.Close) and (child not in self.Open):
                     if env.is_final_state(child.state):
-                        return (child.actionList,self.totalCost,self.nodesExpanded)
+                        return (child.actionsList , child.totalCost ,self.nodesExpanded)
                     self.Open.append(child)
         return ([],-1,self.nodesExpanded)#Failure
 
