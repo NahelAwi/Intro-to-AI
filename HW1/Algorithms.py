@@ -50,15 +50,15 @@ class BFSAgent():
         self.Open.clear()
         self.Close.clear()
         self.Open.append(n)
-        self.nodesExpanded += 1
         while len(self.Open) != 0:
             n = self.Open.pop(0)
-            self.Close.append(n.state)  
+            self.Close.append(n.state) 
+            self.nodesExpanded += 1 
             for child in n.expand(env):
                 if (child.state not in self.Close) and (child not in self.Open):
                     if env.is_final_state(child.state):
                         return (child.actionsList , child.totalCost ,self.nodesExpanded)
-                    self.nodesExpanded += 1
+                    
                     self.Open.append(child)
         return ([],-1,self.nodesExpanded)#Failure
 
