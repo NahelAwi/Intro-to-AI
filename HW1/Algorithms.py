@@ -47,9 +47,17 @@ def ManHattanDistance(n1:tuple, n2:tuple, numCol:int)->int:#TODO Check in case o
         
 def hSMAP(n:'Node', env: DragonBallEnv):
     l = env.get_goal_states()
-    d1 = env.d1
-    d2 = env.d2
-    h = min(ManHattanDistance(n.state,d1,env.ncol), ManHattanDistance(n.state,d2,env.ncol))
+    d1 = ManHattanDistance(n.state,env.d1,env.ncol)
+    d2 = ManHattanDistance(n.state,env.d2,env.ncol)
+    h = 64 #####################TODO Here generates a problem with nodes expanded needs checking
+    if(not env.collected_dragon_balls[0] and not env.collected_dragon_balls[1]):
+        h = min(d1,d2)
+    else:
+        if(not env.collected_dragon_balls[0]):
+            h = d2
+        if(not env.collected_dragon_balls[1]):
+            h = d1
+    ##############################################################################
     for G in l:
         h = min(ManHattanDistance(n.state,G,env.ncol),h)
     return h
@@ -103,9 +111,9 @@ class WeightedAStarAgent():
             for child in n.expand(env):
                 newG = child.totalCost # we already had a counter for the cost so far on each child
                 newF = (1-h_weight)*newG + h_weight*hSMAP(child,env)
+                child.f = newF
+                child.g = newG
                 if (child not in self.Close) and (child not in self.Open):
-                    child.f = newF
-                    child.g = newG
                     self.Open[child] = child.f
                 else:
                     if(child in self.Open):
