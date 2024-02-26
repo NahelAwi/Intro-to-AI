@@ -25,6 +25,8 @@ class Node():
     def expand(self, env: DragonBallEnv) -> list['Node']:
         nA = 4
         successors = []
+        # if(self.state[0] == env.ncol*env.nrow - 1):# if G reached Stop Searching
+        #     return successors
         for a in range(nA):
             env.set_state_2(self.state)
             if(env.succ(self.state)[a] == (None,None,None)): #WE DONT EXPAND HOLES
@@ -49,14 +51,17 @@ def hSMAP(n:'Node', env: DragonBallEnv):
     l = env.get_goal_states()
     d1 = ManHattanDistance(n.state,env.d1,env.ncol)
     d2 = ManHattanDistance(n.state,env.d2,env.ncol)
-    h = 64 #####################TODO Here generates a problem with nodes expanded needs checking
-    if(not env.collected_dragon_balls[0] and not env.collected_dragon_balls[1]):
+    h = env.ncol*env.nrow - 1 #####################TODO Here generates a problem with nodes expanded needs checking
+    #if(not env.collected_dragon_balls[0] and not env.collected_dragon_balls[1]):
+    if(not n.state[1] and not n.state[2]):
         h = min(d1,d2)
     else:
-        if(not env.collected_dragon_balls[0]):
-            h = d2
-        if(not env.collected_dragon_balls[1]):
+        #if(not env.collected_dragon_balls[0]):
+        if(not n.state[1]):
             h = d1
+        #if(not env.collected_dragon_balls[1]):
+        if(not n.state[2]):
+            h = d2
     ##############################################################################
     for G in l:
         h = min(ManHattanDistance(n.state,G,env.ncol),h)
