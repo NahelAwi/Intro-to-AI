@@ -17,7 +17,7 @@ class Node():
         return isinstance(other, Node) and self.state == other.state
 
     def __lt__(self, other):
-        return self.f < other.f
+        return (self.f < other.f or (self.f == other.f and self.state[0] < other.state[0]))
 
     def __hash__(self):
         return hash((self.state, self.f))
@@ -25,8 +25,8 @@ class Node():
     def expand(self, env: DragonBallEnv) -> list['Node']:
         nA = 4
         successors = []
-        # if(self.state[0] == env.ncol*env.nrow - 1):# if G reached Stop Searching
-        #     return successors
+        if(self.state[0] == env.ncol*env.nrow - 1):# if G reached Stop Searching
+            return successors
         for a in range(nA):
             env.set_state_2(self.state)
             if(env.succ(self.state)[a] == (None,None,None)): #WE DONT EXPAND HOLES
@@ -105,7 +105,7 @@ class WeightedAStarAgent():
         n = Node(env.get_initial_state(), None, 0,h_weight*hSMAP(t,env))
         if(env.is_final_state(n.state)):
             return ([],0,1)
-        self.Open[n] = n.f
+        self.Open[n] = (n.f,n.state[0])
         while len(self.Open)!=0:
             Tmp = self.Open.popitem()
             n = Tmp[0]
@@ -119,18 +119,18 @@ class WeightedAStarAgent():
                 child.f = newF
                 child.g = newG
                 if (child not in self.Close) and (child not in self.Open):
-                    self.Open[child] = child.f
+                    self.Open[child] = (child.f,child.state[0])
                 else:
                     if(child in self.Open):
-                        if(child.f < self.Open[child]):
+                        if(child.f < self.Open[child][0]):
                             self.Open.pop(child)
-                            self.Open[child] = child.f
+                            self.Open[child] = (child.f,child.state[0])
                     else:
                         if(child in self.Close):
                             index = self.Close.index(child)
                             currChild = self.Close.pop(index)
                             if(child.f < currChild.f):
-                                self.Open[child] = child.f
+                                self.Open[child] = (child.f,child.state[0])
                             else:
                                 self.Close.append(currChild)
                     
