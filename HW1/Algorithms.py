@@ -142,7 +142,9 @@ class WeightedAStarAgent():
 
 class AStarEpsilonAgent():
     def __init__(self) -> None:
-        raise NotImplementedError
+        self.Open = heapdict.heapdict()
+        self.Close = []
+        self.nodesExpanded = 0
         
     def ssearch(self, env: DragonBallEnv, epsilon: int) -> Tuple[List[int], float, int]:
         raise NotImplementedError
