@@ -17,10 +17,11 @@ class Node():
         return isinstance(other, Node) and self.state == other.state
 
     def __lt__(self, other):
-        return (self.f < other.f or (self.f == other.f and self.state[0] < other.state[0]))#TODO CHECK Comparing tuples in python (its element wise and in order)
+        return (self.state[0] < other.state[0])
+        #return (self.f < other.f or (self.f == other.f and self.state[0] < other.state[0]))#TODO CHECK Comparing tuples in python (its element wise and in order)
 
     def __hash__(self):
-        return hash((self.state, self.f))
+        return hash((self.state, self.state[0]))#TODO check the best Hash
         
     def expand(self, env: DragonBallEnv) -> list['Node']:
         nA = 4
