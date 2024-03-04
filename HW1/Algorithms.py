@@ -21,7 +21,7 @@ class Node():
         #return (self.f < other.f or (self.f == other.f and self.state[0] < other.state[0]))#TODO CHECK Comparing tuples in python (its element wise and in order)
 
     def __hash__(self):
-        return hash((self.state, self.state[0]))#TODO check the best Hash
+        return hash(self.state)#TODO check the best Hash
         
     def expand(self, env: DragonBallEnv) -> list['Node']:
         nA = 4
@@ -33,15 +33,15 @@ class Node():
             if(env.succ(self.state)[a] == (None,None,None)): #WE DONT EXPAND HOLES
                 continue
             state , cost , termiated = env.step(a)
-            if(state == self.state):
+            if(state[0] == self.state[0]):
                 continue
             NewNode = Node(state,self)
             NewNode.totalCost = self.totalCost + cost
             NewNode.actionsList.extend(self.actionsList)
             NewNode.actionsList.append(a)
-            
             successors.append(NewNode)
-
+            
+        env.reset()
         return successors
 
 
@@ -78,20 +78,21 @@ class BFSAgent():
 
     
     def search(self, env: DragonBallEnv) -> Tuple[List[int], float, int]:
+        env.reset()
         n = Node(env.get_initial_state())
         if(env.is_final_state(n.state)):
             return ([],0,1) #OR 0 for first node
         self.Open.clear()
         self.Close.clear()
         self.Open.append(n)
-        while len(self.Open) != 0:
+        while len(self.Open) > 0:
             n = self.Open.pop(0)
             self.Close.append(n.state)
             self.nodesExpanded += 1  
             for child in n.expand(env):
-                if (child.state not in self.Close) and (child not in self.Open):
-                    if env.is_final_state(child.state):
-                        return (child.actionsList , child.totalCost ,self.nodesExpanded)
+                if env.is_final_state(child.state):
+                    return (child.actionsList , child.totalCost ,self.nodesExpanded)
+                if (child.state not in self.Close) and (child.state not in [s.state for s in self.Open]):
                     self.Open.append(child)
         return ([],-1,self.nodesExpanded)#Failure
 
@@ -103,6 +104,7 @@ class WeightedAStarAgent():
         self.nodesExpanded = 0
 
     def search(self, env: DragonBallEnv, h_weight) -> Tuple[List[int], float, int]:
+        env.reset()
         self.Open.clear()
         self.Close.clear()
         t = Node(env.get_initial_state())
@@ -114,9 +116,9 @@ class WeightedAStarAgent():
             Tmp = self.Open.popitem()
             n = Tmp[0]
             self.Close.append(n)
-            self.nodesExpanded += 1
             if env.is_final_state(n.state):
                 return (n.actionsList , n.totalCost ,self.nodesExpanded)
+            self.nodesExpanded += 1
             for child in n.expand(env):
                 newG = child.totalCost # we already had a counter for the cost so far on each child
                 newF = (1-h_weight)*newG + h_weight*hSMAP(child,env)
@@ -172,6 +174,7 @@ class AStarEpsilonAgent():
                 self.Open.__delitem__(entry)
 
     def search(self, env: DragonBallEnv, epsilon: int) -> Tuple[List[int], float, int]:
+        env.reset()
         self.Open.clear()
         self.Close.clear()
         self.Focal.clear()
@@ -187,9 +190,9 @@ class AStarEpsilonAgent():
             tmp = self.Focal.popitem()
             n = tmp[0]
             self.Close.append(n)
-            self.nodesExpanded += 1
             if env.is_final_state(n.state):
                 return (n.actionsList , n.totalCost ,self.nodesExpanded)
+            self.nodesExpanded += 1
             for child in n.expand(env):
                 newG = child.totalCost # we already had a counter for the cost so far on each child
                 newF = 0.5*newG + 0.5*hSMAP(child,env)
