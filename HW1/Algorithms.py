@@ -16,9 +16,9 @@ class Node():
     def __eq__(self, other):
         return isinstance(other, Node) and self.state == other.state
 
-    def __lt__(self, other):
-        return (self.state[0] < other.state[0])
-        #return (self.f < other.f or (self.f == other.f and self.state[0] < other.state[0]))#TODO CHECK Comparing tuples in python (its element wise and in order)
+    # def __lt__(self, other):
+    #     return (self.state[0] < other.state[0])
+    #     #return (self.f < other.f or (self.f == other.f and self.state[0] < other.state[0]))#TODO CHECK Comparing tuples in python (its element wise and in order)
 
     def __hash__(self):
         return hash(self.state)#TODO check the best Hash
@@ -26,22 +26,20 @@ class Node():
     def expand(self, env: DragonBallEnv) -> list['Node']:
         nA = 4
         successors = []
-        if(self.state[0] == env.ncol*env.nrow - 1):# if G reached Stop Searching
+        if(self.state[0] == env.ncol*env.nrow - 1):# if G reached Stop Searching TODO tests include edge cases where we can enter G and come out of it while in this excersice its not permitted
             return successors
         for a in range(nA):
             env.set_state_2(self.state)
             if(env.succ(self.state)[a] == (None,None,None)): #WE DONT EXPAND HOLES
                 continue
             state , cost , termiated = env.step(a)
-            if(state[0] == self.state[0]):
+            if(state == self.state):
                 continue
             NewNode = Node(state,self)
             NewNode.totalCost = self.totalCost + cost
             NewNode.actionsList.extend(self.actionsList)
             NewNode.actionsList.append(a)
             successors.append(NewNode)
-            
-        env.reset()
         return successors
 
 
@@ -85,6 +83,7 @@ class BFSAgent():
         self.Open.clear()
         self.Close.clear()
         self.Open.append(n)
+        self.nodesExpanded = 0
         while len(self.Open) > 0:
             n = self.Open.pop(0)
             self.Close.append(n.state)
@@ -92,7 +91,7 @@ class BFSAgent():
             for child in n.expand(env):
                 if env.is_final_state(child.state):
                     return (child.actionsList , child.totalCost ,self.nodesExpanded)
-                if (child.state not in self.Close) and (child.state not in [s.state for s in self.Open]):
+                if (child.state not in self.Close) and (child not in self.Open):
                     self.Open.append(child)
         return ([],-1,self.nodesExpanded)#Failure
 
@@ -112,6 +111,7 @@ class WeightedAStarAgent():
         if(env.is_final_state(n.state)):
             return ([],0,1)
         self.Open[n] = (n.f,n.state[0])
+        self.nodesExpanded = 0
         while len(self.Open)!=0:
             Tmp = self.Open.popitem()
             n = Tmp[0]
@@ -161,7 +161,7 @@ class AStarEpsilonAgent():
         for entry in self.Focal:
             self.Open[entry] = (entry.f,entry.state[0])
         self.Focal.clear()
-        if(self.Open.__len__()==0): #sanity check ??? 
+        if(self.Open.__len__()==0): #sanity check
             return
         minEntry, minValue = self.Open.popitem()
         minF = minValue[0]
@@ -180,11 +180,12 @@ class AStarEpsilonAgent():
         self.Focal.clear()
         self.epsilon = epsilon
         t = Node(env.get_initial_state())
-        n = Node(env.get_initial_state(), None, 0,0.5*hSMAP(t,env))
+        n = Node(env.get_initial_state(), None, 0,hSMAP(t,env))
         if(env.is_final_state(n.state)):
             return ([],0,1)
         self.Open[n] = (n.f,n.state[0])
         self.UpdateFocal()
+        self.nodesExpanded = 0
         # focalshould have the first node (start node), and it should never be empty before we finish searching.
         while len(self.Focal)!=0:
             tmp = self.Focal.popitem()
@@ -195,7 +196,7 @@ class AStarEpsilonAgent():
             self.nodesExpanded += 1
             for child in n.expand(env):
                 newG = child.totalCost # we already had a counter for the cost so far on each child
-                newF = 0.5*newG + 0.5*hSMAP(child,env)
+                newF = newG + hSMAP(child,env)
                 child.f = newF
                 child.g = newG
                 if (child not in self.Close) and (child not in self.Open) and (child not in self.Focal):
@@ -221,6 +222,6 @@ class AStarEpsilonAgent():
                             self.UpdateFocal()
                         else:
                             self.Close.append(currChild)
-                            #self.UpdateFocal() # maybe unnecessary 
+                            self.UpdateFocal() # maybe unnecessary 
                     
         return ([],-1,self.nodesExpanded)#Failure
