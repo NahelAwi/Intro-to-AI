@@ -5,7 +5,24 @@ import random
 
 # TODO: section a : 3
 def smart_heuristic(env: WarehouseEnv, robot_id: int):
-    pass
+    robot = env.get_robot(robot_id)
+    tValue = max(robot.battery - manhattan_distance(robot.position, env.packages[0].position),
+                 #- manhattan_distance(env.packages[0].position, env.packages[0].destination )
+                 robot.battery - manhattan_distance(robot.position, env.packages[1].position)
+                 #- manhattan_distance(env.packages[1].position, env.packages[1].destination )
+                 )
+    
+    if(tValue >= 0):
+        fvalue = tValue
+    else:
+        fvalue = max(-manhattan_distance(robot.position,env.charge_stations[0].position),
+                     -manhattan_distance(robot.position,env.charge_stations[1].position)) + robot.battery*2
+    sixpack = 0
+    deliver = 0
+    if (tValue >= 0 and robot.package != None):
+        return (robot.battery-manhattan_distance(robot.position, robot.package.destination) + robot.credit)*5
+
+    return fvalue + 7*robot.credit
 
 class AgentGreedyImproved(AgentGreedy):
     def heuristic(self, env: WarehouseEnv, robot_id: int):
