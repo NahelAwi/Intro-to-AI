@@ -1,0 +1,12 @@
+feedback 207608985-315271239
+partA-dry: 10
+partA-wet: 10
+partB-dry: 10
+partB-wet: 10
+partC-dry: 3
+partC-wet: 10
+partD-dry: 7
+partD-wet: 10
+partE: 9
+partF: 18
+total: 97
