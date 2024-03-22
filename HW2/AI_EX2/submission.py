@@ -19,9 +19,11 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
                      -manhattan_distance(robot.position,env.charge_stations[1].position))
     
     if(robot.package != None):
-        return fvalue + 4 - 0.5*manhattan_distance(robot.position, robot.package.destination)
+        # if(robot.position == robot.package.destination):
+        #     return 100000
+        return 10*robot.battery + 40 - 0.5*manhattan_distance(robot.position, robot.package.destination)
     else:
-        return fvalue + 2*robot.credit
+        return 10*robot.battery + fvalue + 10*robot.credit
     
 
 class AgentGreedyImproved(AgentGreedy):
