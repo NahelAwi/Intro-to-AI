@@ -152,21 +152,21 @@ class AgentExpectimax(Agent):
             probabilities = []
             for child, op in zip(children, operators):
                 child.apply_operator(agent_id, op)
-                if not (child.get_charge_station_in(child.get_robot(agent_id).position)):
-                    probabilities.append(1)
-                else:
+                if (op == "move east" or op == "pick_up"):
                     probabilities.append(2)
+                else:
+                    probabilities.append(1)
             assert(len(probabilities) == len(children))
             sum_probabilities = sum(probabilities)
-            for i,p in enumerate(probabilities):
+            for i,prob in enumerate(probabilities):
                 probabilities[i] /= sum_probabilities
             children = [env.clone() for _ in operators]
             expectancy = 0
-            for child, op, p in zip(children, operators, probabilities):
+            for child, op, prob in zip(children, operators, probabilities):
                 end = time.time()
                 child.apply_operator(agent_id, op)
-                _,v = self.TRB_expectimax(child, (agent_id+1)%2, time_limit - (end - begin), my_id)
-                expectancy += p * v
+                _,value = self.TRB_expectimax(child, (agent_id+1)%2, time_limit - (end - begin), my_id)
+                expectancy += prob * value
             return (None, expectancy)
         
 
