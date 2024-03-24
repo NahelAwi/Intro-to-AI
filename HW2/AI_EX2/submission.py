@@ -34,7 +34,7 @@ class AgentGreedyImproved(AgentGreedy):
 class AgentMinimax(Agent):
     # TODO: section b : 1
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
-        operation,value = self.TRB_minimax(self,env,agent_id= agent_id,time_limit=time_limit,my_id=agent_id)
+        operation,value = self.TRB_minimax(env,agent_id= agent_id,time_limit=time_limit,my_id=agent_id)
         if(operation == None):
                 return AgentGreedyImproved().run_step(env,agent_id,time_limit)
         return operation
@@ -52,7 +52,7 @@ class AgentMinimax(Agent):
             for child, op in zip(children, operators):
                 child.apply_operator(agent_id, op)
                 end = time.time()
-                operation,value = self.TRB_minimax(child, env, (agent_id+1)%2, time_limit - (end-begin), my_id)
+                operation,value = self.TRB_minimax(child, (agent_id+1)%2, time_limit - (end-begin), my_id)
                 if(value > curr_max_value):
                     curr_max_operation = operation
                     curr_max_value = value
@@ -64,7 +64,7 @@ class AgentMinimax(Agent):
             for child, op in zip(children, operators):
                 child.apply_operator(agent_id, op)
                 end = time.time()
-                operation,value = self.TRB_minimax(child, env, (agent_id+1)%2, time_limit - (end-begin), my_id)
+                operation,value = self.TRB_minimax(child, (agent_id+1)%2, time_limit - (end-begin), my_id)
                 if(value < curr_min_value):
                     curr_min_operation = operation
                     curr_min_value = value
@@ -75,7 +75,7 @@ class AgentMinimax(Agent):
 class AgentAlphaBeta(Agent):
     # TODO: section c : 1
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
-        operation,value = self.TRB_AlphaBeta_minimax(self,env, agent_id= agent_id, time_limit=time_limit, my_id=agent_id , Alpha=-float("inf"), Beta=float("inf"))
+        operation,value = self.TRB_AlphaBeta_minimax(env, agent_id= agent_id, time_limit=time_limit, my_id=agent_id , Alpha=-float("inf"), Beta=float("inf"))
         if(operation == None):
                 return AgentGreedyImproved().run_step(env,agent_id,time_limit)
         return operation
@@ -93,7 +93,7 @@ class AgentAlphaBeta(Agent):
             for child, op in zip(children, operators):
                 child.apply_operator(agent_id, op)
                 end = time.time()
-                operation,value = self.TRB_AlphaBeta_minimax(child, env, (agent_id+1)%2, time_limit - (end-begin), my_id, Alpha, Beta)
+                operation,value = self.TRB_AlphaBeta_minimax(child, (agent_id+1)%2, time_limit - (end-begin), my_id, Alpha, Beta)
                 
                 if(value > curr_max_value):
                     curr_max_operation = operation
@@ -110,7 +110,7 @@ class AgentAlphaBeta(Agent):
             for child, op in zip(children, operators):
                 child.apply_operator(agent_id, op)
                 end = time.time()
-                operation,value = self.TRB_AlphaBeta_minimax(child, env, (agent_id+1)%2, time_limit - (end-begin), my_id, Alpha, Beta)
+                operation,value = self.TRB_AlphaBeta_minimax(child, (agent_id+1)%2, time_limit - (end-begin), my_id, Alpha, Beta)
 
                 if(value < curr_min_value):
                     curr_min_operation = operation
@@ -125,8 +125,50 @@ class AgentAlphaBeta(Agent):
 class AgentExpectimax(Agent):
     # TODO: section d : 1
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
-        raise NotImplementedError()
+        operation,value = self.TRB_expectimax(env,agent_id= agent_id,time_limit=time_limit,my_id=agent_id)
+        if(operation == None):
+                return AgentGreedyImproved().run_step(env,agent_id,time_limit)
+        return operation
 
+    def TRB_expectimax(self, env: WarehouseEnv, agent_id , time_limit, my_id):
+        begin = time.time()
+        if(env.done() or time_limit <= 0.1):
+            return None,smart_heuristic(env,agent_id)
+        operators = env.get_legal_operators(agent_id)
+        children = [env.clone() for _ in operators]
+        if(agent_id == my_id):
+            curr_max_value = -float("inf")
+            curr_max_operation = None
+
+            for child, op in zip(children, operators):
+                child.apply_operator(agent_id, op)
+                end = time.time()
+                operation,value = self.TRB_expectimax(child, (agent_id+1)%2, time_limit - (end-begin), my_id)
+                if(value > curr_max_value):
+                    curr_max_operation = operation
+                    curr_max_value = value
+            return curr_max_operation,curr_max_value
+        else:
+            probabilities = []
+            for child, op in zip(children, operators):
+                child.apply_operator(agent_id, op)
+                if not (child.get_charge_station_in(child.get_robot(agent_id).position)):
+                    probabilities.append(1)
+                else:
+                    probabilities.append(2)
+            assert(len(probabilities) == len(children))
+            sum_probabilities = sum(probabilities)
+            for i,p in enumerate(probabilities):
+                probabilities[i] /= sum_probabilities
+            children = [env.clone() for _ in operators]
+            expectancy = 0
+            for child, op, p in zip(children, operators, probabilities):
+                end = time.time()
+                child.apply_operator(agent_id, op)
+                _,v = self.TRB_expectimax(child, (agent_id+1)%2, time_limit - (end - begin), my_id)
+                expectancy += p * v
+            return (None, expectancy)
+        
 
 # here you can check specific paths to get to know the environment
 class AgentHardCoded(Agent):
