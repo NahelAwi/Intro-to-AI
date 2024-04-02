@@ -1,5 +1,5 @@
 from copy import deepcopy
-from math import gamma
+from math import gamma, sumprod
 from sre_constants import MAX_UNTIL
 import numpy as np
 
@@ -54,7 +54,7 @@ def get_policy(mdp, U):
     # return: the policy
     #
 
-    # ====== YOUR CODE: ======
+    # ====== YOUR CODE: ======#TODO check if need calculate all the utility and not just the expectancy
     rows = mdp.num_row
     cols = mdp.num_col
 
@@ -79,18 +79,6 @@ def get_policy(mdp, U):
         
         Policy[state[0]][state[1]] = max_action
 
-
-        # max_action = 'UP' #mdp.actions.keys()[0]
-        # new_state = mdp.step(state, max_action)
-        # max_utility = U[new_state[0]][new_state[1]]
-        # for b in range(1,4):
-        #     new_state = mdp.step(state, mdp.actions.keys()[b])
-        #     if(U[new_state[0]][new_state[1]] > max_utility):
-        #         max_utility = U[new_state[0]][new_state[1]]
-        #         max_action = mdp.actions.keys()[b]
-
-        # Policy[state[0]][state[1]] = max_action
-
     return Policy
     # ========================
 
@@ -102,7 +90,27 @@ def policy_evaluation(mdp, policy):
     #
 
     # ====== YOUR CODE: ======
-    raise NotImplementedError
+    rows = mdp.num_row
+    cols = mdp.num_col
+
+    U = [[0 for _ in range(cols)] for _ in range(rows)] #TODO check [0]
+    for _ in range(rows*cols):#TODO check stopping condition
+        for state, value in np.ndenumerate(mdp.board):
+            if(value == 'WALL'):
+                U[state[0]][state[1]] = None
+                continue
+            if(state in mdp.terminal_states):
+                U[state[0]][state[1]] = float(value)
+                continue
+
+            sumProb = 0
+            for b in range(4):  # b => [(up,0),(down,1),(right,2),(left,3)] #TODO Check if need only sum different states i.e. not the original
+                new_state = mdp.step(state, mdp.actions.keys()[b])
+                sumProb += mdp.transition_function[ policy[state[0]][state[1]] ][b] * U[new_state[0]][new_state[1]]
+
+            U[state[0]][state[1]] = float(value) + mdp.gamma*sumProb
+
+    return U
     # ========================
 
 
@@ -114,7 +122,7 @@ def policy_iteration(mdp, policy_init):
     #
 
     # ====== YOUR CODE: ======
-    raise NotImplementedError
+    
     # ========================
 
 
