@@ -11,34 +11,37 @@ def value_iteration(mdp, U_init, epsilon=10 ** (-3)):
     # return: the U obtained at the end of the algorithms' run.
     #
 
-    # ====== YOUR CODE: ======
-    #TODO check if U_t and U == U_init 
-    U_t = np.zeros_like(U_init)
+    # ====== YOUR CODE: ====== 
+    U_t = deepcopy(U_init)
     while True:
-        U = U_t
+        U = deepcopy(U_t)
         delta = 0
 
-        for state in np.nditer(mdp.board):
-            if(state == 'WALL' or state in mdp.terminal_states):
+        for state, value in np.ndenumerate(mdp.board):
+            if(value == 'WALL'):
+                U_t[state[0]][state[1]] = None
+                continue
+            if(state in mdp.terminal_states):
+                U_t[state[0]][state[1]] = float(value)
                 continue
 
             max_TU = -float('inf')
-            for a in mdp.actions.keys(): #Probability is 1
+            for a in mdp.actions.keys():
 
                 tmp = 0
-                for b in range(4):
+                for b in range(4):  #[(up,0),(down,1),(right,2),(left,3)] #TODO Check if need only sum different states i.e. not the original
                     new_state = mdp.step(state, mdp.actions.keys()[b])
                     tmp += mdp.transition_function[a][b] * U[new_state[0]][new_state[1]]
 
                 if( tmp > max_TU):
                     max_TU = tmp
 
-            U_t[state[0]][state[1]] = U_init[state[0]][state[1]] + mdp.gamma*max_TU
+            U_t[state[0]][state[1]] = float(value) + mdp.gamma*max_TU
             if(abs(U_t[state[0]][state[1]] - U[state[0]][state[1]]) > delta):
                 delta = abs(U_t[state[0]][state[1]] - U[state[0]][state[1]])
 
 
-        if(delta < epsilon*(1-mdp.gamma)/mdp.gamma):
+        if(delta <= epsilon*(1-mdp.gamma)/mdp.gamma):
             break
     return U
     # ========================
