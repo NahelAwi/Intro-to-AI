@@ -2,6 +2,7 @@ from copy import deepcopy
 from math import gamma, sumprod
 from sre_constants import MAX_UNTIL
 import numpy as np
+from sympy import false
 
 
 def value_iteration(mdp, U_init, epsilon=10 ** (-3)):
@@ -122,7 +123,39 @@ def policy_iteration(mdp, policy_init):
     #
 
     # ====== YOUR CODE: ======
-    
+    pi = deepcopy(policy_init)
+    while True:
+        U = policy_evaluation(mdp=mdp, policy=pi)
+        unchanged = True
+
+        for state, value in np.ndenumerate(mdp.board):
+            if(value == 'WALL' or state in mdp.terminal_states):
+                pi[state[0]][state[1]] = None
+                continue
+
+            max_action = None
+            max_TU = -float('inf')
+            for a in mdp.actions.keys():
+                tmp = 0
+                for b in range(4):  #[(up,0),(down,1),(right,2),(left,3)] #TODO Check if need only sum different states i.e. not the original
+                    new_state = mdp.step(state, mdp.actions.keys()[b])
+                    tmp += mdp.transition_function[a][b] * U[new_state[0]][new_state[1]]
+                if( tmp > max_TU):
+                    max_TU = tmp
+                    max_action = a
+
+            sumProb = 0
+            for b in range(4):  # b => [(up,0),(down,1),(right,2),(left,3)] #TODO Check if need only sum different states i.e. not the original
+                new_state = mdp.step(state, mdp.actions.keys()[b])
+                sumProb += mdp.transition_function[ pi[state[0]][state[1]] ][b] * U[new_state[0]][new_state[1]]
+            
+            if( max_TU > sumProb):
+                pi[state[0]][state[1]] = max_action
+                unchanged = False
+
+        if unchanged:
+            break
+    return pi
     # ========================
 
 
