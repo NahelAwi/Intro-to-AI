@@ -1,5 +1,6 @@
 from copy import deepcopy
 from math import gamma
+from sre_constants import MAX_UNTIL
 import numpy as np
 
 
@@ -54,7 +55,43 @@ def get_policy(mdp, U):
     #
 
     # ====== YOUR CODE: ======
-    raise NotImplementedError
+    rows = mdp.num_row
+    cols = mdp.num_col
+
+    Policy = [['UP' for _ in range(cols)] for _ in range(rows)]
+    for state, value in np.ndenumerate(U):
+        if(value == None or state in mdp.terminal_states):
+            Policy[state[0]][state[1]] = None
+            continue
+        
+        max_action = None
+        max_E = -float('inf')
+
+        for a in mdp.actions.keys():
+            expected_utility = 0
+            for b in range(4):  # b => [(up,0),(down,1),(right,2),(left,3)] #TODO Check if need only sum different states i.e. not the original
+                new_state = mdp.step(state, mdp.actions.keys()[b])
+                expected_utility += mdp.transition_function[a][b] * U[new_state[0]][new_state[1]]
+
+            if(expected_utility > max_E):
+                max_E = expected_utility
+                max_action = a
+        
+        Policy[state[0]][state[1]] = max_action
+
+
+        # max_action = 'UP' #mdp.actions.keys()[0]
+        # new_state = mdp.step(state, max_action)
+        # max_utility = U[new_state[0]][new_state[1]]
+        # for b in range(1,4):
+        #     new_state = mdp.step(state, mdp.actions.keys()[b])
+        #     if(U[new_state[0]][new_state[1]] > max_utility):
+        #         max_utility = U[new_state[0]][new_state[1]]
+        #         max_action = mdp.actions.keys()[b]
+
+        # Policy[state[0]][state[1]] = max_action
+
+    return Policy
     # ========================
 
 
