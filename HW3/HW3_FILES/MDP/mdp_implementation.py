@@ -32,7 +32,7 @@ def value_iteration(mdp, U_init, epsilon=10 ** (-3)):
 
                 tmp = 0
                 for b in range(4):  #[(up,0),(down,1),(right,2),(left,3)] #TODO Check if need only sum different states i.e. not the original
-                    new_state = mdp.step(state, mdp.actions.keys()[b])
+                    new_state = mdp.step(state, list(mdp.actions.keys())[b])
                     tmp += mdp.transition_function[a][b] * U[new_state[0]][new_state[1]]
 
                 if( tmp > max_TU):
@@ -71,7 +71,7 @@ def get_policy(mdp, U):
         for a in mdp.actions.keys():
             expected_utility = 0
             for b in range(4):  # b => [(up,0),(down,1),(right,2),(left,3)] #TODO Check if need only sum different states i.e. not the original
-                new_state = mdp.step(state, mdp.actions.keys()[b])
+                new_state = mdp.step(state, list(mdp.actions.keys())[b])
                 expected_utility += mdp.transition_function[a][b] * U[new_state[0]][new_state[1]]
 
             if(expected_utility > max_E):
@@ -106,7 +106,7 @@ def policy_evaluation(mdp, policy):
 
             sumProb = 0
             for b in range(4):  # b => [(up,0),(down,1),(right,2),(left,3)] #TODO Check if need only sum different states i.e. not the original
-                new_state = mdp.step(state, mdp.actions.keys()[b])
+                new_state = mdp.step(state, list(mdp.actions.keys())[b])
                 sumProb += mdp.transition_function[ policy[state[0]][state[1]] ][b] * U[new_state[0]][new_state[1]]
 
             U[state[0]][state[1]] = float(value) + mdp.gamma*sumProb
@@ -138,7 +138,7 @@ def policy_iteration(mdp, policy_init):
             for a in mdp.actions.keys():
                 tmp = 0
                 for b in range(4):  #[(up,0),(down,1),(right,2),(left,3)] #TODO Check if need only sum different states i.e. not the original
-                    new_state = mdp.step(state, mdp.actions.keys()[b])
+                    new_state = mdp.step(state, list(mdp.actions.keys())[b])
                     tmp += mdp.transition_function[a][b] * U[new_state[0]][new_state[1]]
                 if( tmp > max_TU):
                     max_TU = tmp
@@ -146,7 +146,7 @@ def policy_iteration(mdp, policy_init):
 
             sumProb = 0
             for b in range(4):  # b => [(up,0),(down,1),(right,2),(left,3)] #TODO Check if need only sum different states i.e. not the original
-                new_state = mdp.step(state, mdp.actions.keys()[b])
+                new_state = mdp.step(state, list(mdp.actions.keys())[b])
                 sumProb += mdp.transition_function[ pi[state[0]][state[1]] ][b] * U[new_state[0]][new_state[1]]
             
             if( max_TU > sumProb):
