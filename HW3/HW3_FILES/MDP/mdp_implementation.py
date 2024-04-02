@@ -110,9 +110,41 @@ def policy_evaluation(mdp, policy):
                 sumProb += mdp.transition_function[ policy[state[0]][state[1]] ][b] * U[new_state[0]][new_state[1]]
 
             U[state[0]][state[1]] = float(value) + mdp.gamma*sumProb
-
     return U
+
     # ========================
+
+    ############################ Closed Solution TRY - not final##############################
+    # rows = mdp.num_row
+    # cols = mdp.num_col
+
+    # n = rows*cols
+
+    # P = np.zeros((n, n))
+
+    # R = np.zeros(n) #deepcopy(mdp.board).flatten()
+
+    # U = np.zeros(n)
+
+    # for state, value in np.ndenumerate(mdp.board):
+    #     if(value == 'WALL'):
+    #         continue
+    #     if(state in mdp.terminal_states):
+    #         P[state[0]+state[1]][state[0]+state[1]] = 1
+    #         R[state[0]+state[1]] = float(value)
+    #         continue
+    #     action = policy[state[0]][state[1]]
+    #     for b in range(4):  # b => [(up,0),(down,1),(right,2),(left,3)] #TODO Check if need only sum different states i.e. not the original
+    #         new_state = mdp.step(state, list(mdp.actions.keys())[b])
+    #         P[state[0]+state[1]][new_state[0]+new_state[1]] = mdp.transition_function[action][b]
+    #         R[state[0]+state[1]] += mdp.transition_function[action][b]*float(value)
+
+    # U = np.linalg.inv(np.eye(n) - mdp.gamma * P) @ R
+
+    # U = U.reshape((rows,cols))
+
+    # return U
+    #############################################################################################################
 
 
 def policy_iteration(mdp, policy_init):
