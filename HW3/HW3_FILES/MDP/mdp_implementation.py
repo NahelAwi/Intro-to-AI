@@ -1,4 +1,5 @@
 from copy import deepcopy
+from math import gamma
 import numpy as np
 
 
@@ -11,7 +12,35 @@ def value_iteration(mdp, U_init, epsilon=10 ** (-3)):
     #
 
     # ====== YOUR CODE: ======
-    raise NotImplementedError
+    #TODO check if U_t and U == U_init 
+    U_t = np.zeros_like(U_init)
+    while True:
+        U = U_t
+        delta = 0
+
+        for state in np.nditer(mdp.board):
+            if(state == 'WALL' or state in mdp.terminal_states):
+                continue
+
+            max_TU = -float('inf')
+            for a in mdp.actions.keys(): #Probability is 1
+
+                tmp = 0
+                for b in range(4):
+                    new_state = mdp.step(state, mdp.actions.keys()[b])
+                    tmp += mdp.transition_function[a][b] * U[new_state[0]][new_state[1]]
+
+                if( tmp > max_TU):
+                    max_TU = tmp
+
+            U_t[state[0]][state[1]] = U_init[state[0]][state[1]] + mdp.gamma*max_TU
+            if(abs(U_t[state[0]][state[1]] - U[state[0]][state[1]]) > delta):
+                delta = abs(U_t[state[0]][state[1]] - U[state[0]][state[1]])
+
+
+        if(delta < epsilon*(1-mdp.gamma)/mdp.gamma):
+            break
+    return U
     # ========================
 
 
