@@ -112,7 +112,8 @@ def example_driver():
     print('\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
     print("@@@@@@@@@ Policies for different rewards: @@@@@@@@")
     print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n')
-    get_policy_for_different_rewards(mdp)
+    thresholds = get_policy_for_different_rewards(mdp)
+    print(thresholds)
 
     print("\nDone!")
 

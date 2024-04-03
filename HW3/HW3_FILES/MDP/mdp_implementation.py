@@ -310,5 +310,5 @@ def get_policy_for_different_rewards(mdp):  # You can add more input parameters 
             policy = get_all_policies(mdp,U, print=False, retP= True)
 
         R += Decimal('0.01')
-    print(thresholds)
+    return thresholds
     # ========================
