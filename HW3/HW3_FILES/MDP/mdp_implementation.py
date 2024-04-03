@@ -1,7 +1,10 @@
 from copy import deepcopy
+from email import policy
 from math import gamma, sumprod
+from re import S
 from sre_constants import MAX_UNTIL
 import numpy as np
+from pyparsing import Word
 from sympy import false
 
 
@@ -100,7 +103,7 @@ def policy_evaluation(mdp, policy):
     rows = mdp.num_row
     cols = mdp.num_col
 
-    U = [[0.0 for _ in range(cols)] for _ in range(rows)] #TODO check [0]
+    U = [[0.0 for _ in range(cols)] for _ in range(rows)] 
     for _ in range(rows*cols):#TODO check stopping condition
         for state, value in np.ndenumerate(mdp.board):
             if(value == 'WALL'):
@@ -216,7 +219,37 @@ def get_all_policies(mdp, U):  # You can add more input parameters as needed
     #
 
     # ====== YOUR CODE: ======
-    raise NotImplementedError
+    rows = mdp.num_row
+    cols = mdp.num_col
+
+    Policies = [['' for _ in range(cols)] for _ in range(rows)]
+
+    WordToArrow = {'UP':'↑','DOWN':'↓','RIGHT':'→','LEFT':'←'}
+    numPolicies = 1
+    for state, value in np.ndenumerate(mdp.board):
+        if(value == 'WALL' or state in mdp.terminal_states):
+            Policies[state[0]][state[1]] = None
+            continue
+
+        max_utility = -float('inf')
+        best_actions = []
+        for a in mdp.actions.keys():
+            expected_utility = 0
+            for b in range(4):  #[(up,0),(down,1),(right,2),(left,3)] 
+                new_state = mdp.step(state, list(mdp.actions.keys())[b])
+                expected_utility += mdp.transition_function[a][b] * U[new_state[0]][new_state[1]]
+            
+            if( expected_utility > max_utility):
+                max_utility = expected_utility
+                best_actions = [a]
+            elif expected_utility == max_utility:
+                best_actions.append(a)
+        
+        numPolicies *= len(best_actions)
+        for action in best_actions:
+            Policies[state[0]][state[1]] += WordToArrow[action]
+    mdp.print_policy(Policies)
+    return numPolicies
     # ========================
 
 

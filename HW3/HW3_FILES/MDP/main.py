@@ -1,7 +1,7 @@
 import argparse
 import os
 from mdp import MDP
-from mdp_implementation import value_iteration, get_policy, policy_evaluation, policy_iteration
+from mdp_implementation import value_iteration, get_policy, policy_evaluation, policy_iteration, get_all_policies, get_policy_for_different_rewards
 
 
 def is_valid_file(parser, arg):
@@ -94,7 +94,27 @@ def example_driver():
     policy_new = policy_iteration(mdp, policy)
     mdp.print_policy(policy_new)
 
-    print("Done!")
+
+    print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+    print("@@@@@@@@@ Get All Policies @@@@@@@@")
+    print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+
+    print("\nBoard Utilities")
+    MY_U = [[0.2, 0.2, 0.2, 1.0],
+            [0.2, None, 0.2, -1.0],
+            [0.2, 0.2, 0.2, 0.2]]
+    mdp.print_utility(MY_U)
+    print("\nMatching policies")
+    MY_n = get_all_policies(mdp,MY_U)
+    print("\nNumber of different policies aligned with the utility above: ",MY_n)
+
+
+    print('\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+    print("@@@@@@@@@ Policies for different rewards: @@@@@@@@")
+    print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+    #get_policy_for_different_rewards(mdp)
+
+    print("\nDone!")
 
 
 if __name__ == '__main__':
