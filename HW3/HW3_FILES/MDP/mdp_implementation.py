@@ -68,7 +68,7 @@ def get_policy(mdp, U):
         if(value == None or state in mdp.terminal_states):
             Policy[state[0]][state[1]] = None
             continue
-        
+        #TODO CHECK AGAIN FOR MIN DIFFERENCE IN EXPECTED UTILITY after reward and gamma with GIVEN U
         max_action = None
         max_E = -float('inf')
 
@@ -99,7 +99,7 @@ def policy_evaluation(mdp, policy):
     cols = mdp.num_col
 
     U = [[0.0 for _ in range(cols)] for _ in range(rows)] 
-    for _ in range(rows*cols):#TODO check stopping condition
+    for _ in range(rows*cols):#TODO check stopping condition i.e. closed formula
         for state, value in np.ndenumerate(mdp.board):
             if(value == 'WALL'):
                 U[state[0]][state[1]] = None
@@ -234,7 +234,7 @@ def get_all_policies(mdp, U, print = True, retP = False):  # You can add more in
             expected_utility = 0.0
             for b in range(4):  #[(up,0),(down,1),(right,2),(left,3)] 
                 new_state = mdp.step(state, list(mdp.actions.keys())[b])
-                expected_utility += mdp.transition_function[a][b] * float(U[new_state[0]][new_state[1]])
+                expected_utility += mdp.transition_function[a][b] * float(U[new_state[0]][new_state[1]])#TODO check (float(value) + mdp.gamma*float(U[new_state[0]][new_state[1]]))
             expected_utility = round(expected_utility,2)
             if( expected_utility > max_utility):
                 max_utility = expected_utility
@@ -255,18 +255,16 @@ def get_all_policies(mdp, U, print = True, retP = False):  # You can add more in
 
 
 def print_Reward_limits(left, right, betweenL=-5.0, betweenR=5.0):
-    # left = round(left,2)
-    # right = round(right,2)
-    if(left == betweenL and right == betweenR):
-        print('     ' + str(left) + ' <= R(s) <= ' + str(right))
-        return
-    if(left == betweenL):
-        print('     ' + str(left) + ' <= R(s) < ' + str(right))
-        return
-    if(right == betweenR):
-        print('     ' + str(left) + ' < R(s) <= ' + str(right))
-        return
-    print('     ' + str(left) + ' < R(s) < ' + str(right))
+    #if(left == betweenL and right == betweenR):
+    print('     ' + str(left) + ' <= R(s) <= ' + str(right))
+    return
+    # if(left == betweenL):
+    #     print('     ' + str(left) + ' <= R(s) < ' + str(right))
+    #     return
+    # if(right == betweenR):
+    #     print('     ' + str(left) + ' < R(s) <= ' + str(right))
+    #     return
+    # print('     ' + str(left) + ' < R(s) < ' + str(right))
 
 
 
@@ -285,25 +283,32 @@ def get_policy_for_different_rewards(mdp):  # You can add more input parameters 
     L = Decimal('-5.0')
     R = Decimal('-5.0')
     policy = None
+    thresholds = []
     while(R <= Decimal('5.0')):
-        U = [[float(R) for _ in range(cols)] for _ in range(rows)]
+        new_board = [[float(R) for _ in range(cols)] for _ in range(rows)]
         for state, value in np.ndenumerate(mdp.board):
             if(value == 'WALL' ):
-                U[state[0]][state[1]] = None
+                new_board[state[0]][state[1]] = 'WALL'
             elif (state in mdp.terminal_states):
-                U[state[0]][state[1]] = float(value)
+                new_board[state[0]][state[1]] = value
+        
+        mdp.board = deepcopy(new_board)
+        U = [[0.0 for _ in range(cols)] for _ in range(rows)]
+        U = value_iteration(mdp,U)
 
         if(R != -5.0):
             p_t = policy
             policy = get_all_policies(mdp,U, print=False, retP= True)
 
             if ((p_t != policy) or R == 5.0): #meaning got to the right limit [FINAL PRINT] - not np.allclose(p_t,policy,equal_nan=True
-                print_Reward_limits(L,R)
+                print_Reward_limits(L,R - Decimal('0.01')*(R !=5.0) )
                 mdp.print_policy(p_t)
-                L = R  
+                L = R
+                if(R!=5.0):
+                    thresholds.append(float(R - Decimal('0.01')))  
         else:
             policy = get_all_policies(mdp,U, print=False, retP= True)
 
-        #R += 0.01
         R += Decimal('0.01')
+    print(thresholds)
     # ========================
