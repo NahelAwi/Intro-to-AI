@@ -45,6 +45,12 @@ def value_iteration(mdp, U_init, epsilon=10 ** (-3)):
 
         if(delta <= epsilon*(1-mdp.gamma)/mdp.gamma):
             break
+    
+    for i in range(mdp.num_row):
+        for j in range(mdp.num_col):
+            if(U[i][j] != None):
+                U[i][j] = round(U[i][j],2)
+
     return U
     # ========================
 
@@ -94,7 +100,7 @@ def policy_evaluation(mdp, policy):
     rows = mdp.num_row
     cols = mdp.num_col
 
-    U = [[0 for _ in range(cols)] for _ in range(rows)] #TODO check [0]
+    U = [[0.0 for _ in range(cols)] for _ in range(rows)] #TODO check [0]
     for _ in range(rows*cols):#TODO check stopping condition
         for state, value in np.ndenumerate(mdp.board):
             if(value == 'WALL'):
@@ -110,6 +116,11 @@ def policy_evaluation(mdp, policy):
                 sumProb += mdp.transition_function[ policy[state[0]][state[1]] ][b] * U[new_state[0]][new_state[1]]
 
             U[state[0]][state[1]] = float(value) + mdp.gamma*sumProb
+    for i in range(rows):
+        for j in range(cols):
+            if(U[i][j] != None):
+                U[i][j] = round(U[i][j],2)
+
     return U
 
     # ========================
