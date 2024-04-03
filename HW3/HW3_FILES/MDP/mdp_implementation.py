@@ -1,11 +1,6 @@
 from copy import deepcopy
-from email import policy
-from math import gamma, sumprod
-from re import S
-from sre_constants import MAX_UNTIL
 import numpy as np
-from pyparsing import Word
-from sympy import false
+from decimal import Decimal
 
 
 def value_iteration(mdp, U_init, epsilon=10 ** (-3)):
@@ -34,7 +29,7 @@ def value_iteration(mdp, U_init, epsilon=10 ** (-3)):
             for a in mdp.actions.keys():
 
                 tmp = 0
-                for b in range(4):  #[(up,0),(down,1),(right,2),(left,3)] #TODO Check if need only sum different states i.e. not the original
+                for b in range(4):  #[(up,0),(down,1),(right,2),(left,3)] 
                     new_state = mdp.step(state, list(mdp.actions.keys())[b])
                     tmp += mdp.transition_function[a][b] * U[new_state[0]][new_state[1]]
 
@@ -79,7 +74,7 @@ def get_policy(mdp, U):
 
         for a in mdp.actions.keys():
             expected_utility = 0
-            for b in range(4):  # b => [(up,0),(down,1),(right,2),(left,3)] #TODO Check if need only sum different states i.e. not the original
+            for b in range(4):  # b => [(up,0),(down,1),(right,2),(left,3)] 
                 new_state = mdp.step(state, list(mdp.actions.keys())[b])
                 expected_utility += mdp.transition_function[a][b] * U[new_state[0]][new_state[1]]
 
@@ -114,7 +109,7 @@ def policy_evaluation(mdp, policy):
                 continue
 
             sumProb = 0
-            for b in range(4):  # b => [(up,0),(down,1),(right,2),(left,3)] #TODO Check if need only sum different states i.e. not the original
+            for b in range(4):  # b => [(up,0),(down,1),(right,2),(left,3)] 
                 new_state = mdp.step(state, list(mdp.actions.keys())[b])
                 sumProb += mdp.transition_function[ policy[state[0]][state[1]] ][b] * U[new_state[0]][new_state[1]]
 
@@ -148,7 +143,7 @@ def policy_evaluation(mdp, policy):
     #         R[state[0]+state[1]] = float(value)
     #         continue
     #     action = policy[state[0]][state[1]]
-    #     for b in range(4):  # b => [(up,0),(down,1),(right,2),(left,3)] #TODO Check if need only sum different states i.e. not the original
+    #     for b in range(4):  # b => [(up,0),(down,1),(right,2),(left,3)] 
     #         new_state = mdp.step(state, list(mdp.actions.keys())[b])
     #         P[state[0]+state[1]][new_state[0]+new_state[1]] = mdp.transition_function[action][b]
     #         R[state[0]+state[1]] += mdp.transition_function[action][b]*float(value)
@@ -208,8 +203,10 @@ def policy_iteration(mdp, policy_init):
 
 """For this functions, you can import what ever you want """
 
+#print is a flag for this function to print or not
+#retP is a flag that detirmens if the function returns the policies or the number of them
 
-def get_all_policies(mdp, U):  # You can add more input parameters as needed
+def get_all_policies(mdp, U, print = True, retP = False):  # You can add more input parameters as needed
     # TODO:
     # Given the mdp, and the utility value U (which satisfies the Belman equation)
     # print / display all the policies that maintain this value
@@ -234,11 +231,11 @@ def get_all_policies(mdp, U):  # You can add more input parameters as needed
         max_utility = -float('inf')
         best_actions = []
         for a in mdp.actions.keys():
-            expected_utility = 0
+            expected_utility = 0.0
             for b in range(4):  #[(up,0),(down,1),(right,2),(left,3)] 
                 new_state = mdp.step(state, list(mdp.actions.keys())[b])
-                expected_utility += mdp.transition_function[a][b] * U[new_state[0]][new_state[1]]
-            
+                expected_utility += mdp.transition_function[a][b] * float(U[new_state[0]][new_state[1]])
+            expected_utility = round(expected_utility,2)
             if( expected_utility > max_utility):
                 max_utility = expected_utility
                 best_actions = [a]
@@ -248,9 +245,29 @@ def get_all_policies(mdp, U):  # You can add more input parameters as needed
         numPolicies *= len(best_actions)
         for action in best_actions:
             Policies[state[0]][state[1]] += WordToArrow[action]
-    mdp.print_policy(Policies)
-    return numPolicies
+    if(print):
+        mdp.print_policy(Policies)
+    if(retP):
+        return Policies
+    else:
+        return numPolicies
     # ========================
+
+
+def print_Reward_limits(left, right, betweenL=-5.0, betweenR=5.0):
+    # left = round(left,2)
+    # right = round(right,2)
+    if(left == betweenL and right == betweenR):
+        print('     ' + str(left) + ' <= R(s) <= ' + str(right))
+        return
+    if(left == betweenL):
+        print('     ' + str(left) + ' <= R(s) < ' + str(right))
+        return
+    if(right == betweenR):
+        print('     ' + str(left) + ' < R(s) <= ' + str(right))
+        return
+    print('     ' + str(left) + ' < R(s) < ' + str(right))
+
 
 
 def get_policy_for_different_rewards(mdp):  # You can add more input parameters as needed
@@ -261,5 +278,32 @@ def get_policy_for_different_rewards(mdp):  # You can add more input parameters 
     #
 
     # ====== YOUR CODE: ======
-    raise NotImplementedError
+    rows = mdp.num_row
+    cols = mdp.num_col
+    # L = -5.0
+    # R = -5.0
+    L = Decimal('-5.0')
+    R = Decimal('-5.0')
+    policy = None
+    while(R <= Decimal('5.0')):
+        U = [[float(R) for _ in range(cols)] for _ in range(rows)]
+        for state, value in np.ndenumerate(mdp.board):
+            if(value == 'WALL' ):
+                U[state[0]][state[1]] = None
+            elif (state in mdp.terminal_states):
+                U[state[0]][state[1]] = float(value)
+
+        if(R != -5.0):
+            p_t = policy
+            policy = get_all_policies(mdp,U, print=False, retP= True)
+
+            if ((p_t != policy) or R == 5.0): #meaning got to the right limit [FINAL PRINT] - not np.allclose(p_t,policy,equal_nan=True
+                print_Reward_limits(L,R)
+                mdp.print_policy(p_t)
+                L = R  
+        else:
+            policy = get_all_policies(mdp,U, print=False, retP= True)
+
+        #R += 0.01
+        R += Decimal('0.01')
     # ========================
