@@ -100,9 +100,9 @@ def example_driver():
     print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
 
     print("\nBoard Utilities")
-    MY_U = [[0.2, 0.2, 0.2, 1.0],
-            [0.2, None, 0.2, -1.0],
-            [0.2, 0.2, 0.2, 0.2]]
+    MY_U = [[0.749, 0.819, 0.876, 1.0],
+            [0.692, 0, 0.564, -1.0],
+            [0.623, 0.566, 0.518, 0.252]]
     mdp.print_utility(MY_U)
     print("\nMatching policies")
     MY_n = get_all_policies(mdp,MY_U)
