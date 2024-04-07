@@ -59,7 +59,7 @@ def get_policy(mdp, U):
     # return: the policy
     #
 
-    # ====== YOUR CODE: ======#TODO check if need calculate all the utility and not just the expectancy
+    # ====== YOUR CODE: ======#
     rows = mdp.num_row
     cols = mdp.num_col
 
@@ -68,7 +68,7 @@ def get_policy(mdp, U):
         if(value == None or state in mdp.terminal_states):
             Policy[state[0]][state[1]] = None
             continue
-        #TODO CHECK AGAIN FOR MIN DIFFERENCE IN EXPECTED UTILITY after reward and gamma with GIVEN U
+        
         max_action = None
         max_E = -float('inf')
 
@@ -77,7 +77,7 @@ def get_policy(mdp, U):
             for b in range(4):  # b => [(up,0),(down,1),(right,2),(left,3)] 
                 new_state = mdp.step(state, list(mdp.actions.keys())[b])
                 expected_utility += mdp.transition_function[a][b] * U[new_state[0]][new_state[1]]
-
+            expected_utility = float(value) + mdp.gamma*expected_utility
             if(expected_utility > max_E):
                 max_E = expected_utility
                 max_action = a
@@ -123,7 +123,7 @@ def policy_evaluation(mdp, policy):
 
     # ========================
 
-    ############################ Closed Solution TRY - not final##############################
+    ############################ Closed formula Solution TRY - not final##############################
     # rows = mdp.num_row
     # cols = mdp.num_col
 
@@ -178,7 +178,7 @@ def policy_iteration(mdp, policy_init):
             max_TU = -float('inf')
             for a in mdp.actions.keys():
                 tmp = 0
-                for b in range(4):  #[(up,0),(down,1),(right,2),(left,3)] #TODO Check if need only sum different states i.e. not the original
+                for b in range(4):  #[(up,0),(down,1),(right,2),(left,3)] 
                     new_state = mdp.step(state, list(mdp.actions.keys())[b])
                     tmp += mdp.transition_function[a][b] * U[new_state[0]][new_state[1]]
                 if( tmp > max_TU):
@@ -186,7 +186,7 @@ def policy_iteration(mdp, policy_init):
                     max_action = a
 
             sumProb = 0
-            for b in range(4):  # b => [(up,0),(down,1),(right,2),(left,3)] #TODO Check if need only sum different states i.e. not the original
+            for b in range(4):  # b => [(up,0),(down,1),(right,2),(left,3)] 
                 new_state = mdp.step(state, list(mdp.actions.keys())[b])
                 sumProb += mdp.transition_function[ pi[state[0]][state[1]] ][b] * U[new_state[0]][new_state[1]]
             
@@ -206,7 +206,7 @@ def policy_iteration(mdp, policy_init):
 #print is a flag for this function to print or not
 #retP is a flag that detirmens if the function returns the policies or the number of them
 
-def get_all_policies(mdp, U, print = True, retP = False):  # You can add more input parameters as needed
+def get_all_policies(mdp, U, epsilon=10**(-3), print = True, retP = False):  # You can add more input parameters as needed
     # TODO:
     # Given the mdp, and the utility value U (which satisfies the Belman equation)
     # print / display all the policies that maintain this value
@@ -234,7 +234,8 @@ def get_all_policies(mdp, U, print = True, retP = False):  # You can add more in
             expected_utility = 0.0
             for b in range(4):  #[(up,0),(down,1),(right,2),(left,3)] 
                 new_state = mdp.step(state, list(mdp.actions.keys())[b])
-                expected_utility += mdp.transition_function[a][b] * float(U[new_state[0]][new_state[1]])#TODO check (float(value) + mdp.gamma*float(U[new_state[0]][new_state[1]]))
+                expected_utility += mdp.transition_function[a][b] * float(U[new_state[0]][new_state[1]])
+            expected_utility = float(value) + mdp.gamma*expected_utility
             expected_utility = round(expected_utility,2)
             if( expected_utility > max_utility):
                 max_utility = expected_utility
@@ -255,20 +256,20 @@ def get_all_policies(mdp, U, print = True, retP = False):  # You can add more in
 
 
 def print_Reward_limits(left, right, betweenL=-5.0, betweenR=5.0):
-    #if(left == betweenL and right == betweenR):
-    print('     ' + str(left) + ' <= R(s) <= ' + str(right))
-    return
-    # if(left == betweenL):
-    #     print('     ' + str(left) + ' <= R(s) < ' + str(right))
-    #     return
-    # if(right == betweenR):
-    #     print('     ' + str(left) + ' < R(s) <= ' + str(right))
-    #     return
-    # print('     ' + str(left) + ' < R(s) < ' + str(right))
+    if(left == betweenL and right == betweenR):
+        print('     ' + str(left) + ' <= R(s) <= ' + str(right))
+        return
+    if(left == betweenL):
+        print('     ' + str(left) + ' <= R(s) < ' + str(right))
+        return
+    if(right == betweenR):
+        print('     ' + str(left) + ' <= R(s) <= ' + str(right))
+        return
+    print('     ' + str(left) + ' <= R(s) < ' + str(right))
 
 
 
-def get_policy_for_different_rewards(mdp):  # You can add more input parameters as needed
+def get_policy_for_different_rewards(mdp, epsilon=10**(-3)):  # You can add more input parameters as needed
     # TODO:
     # Given the mdp
     # print / displas the optimal policy as a function of r
@@ -294,18 +295,18 @@ def get_policy_for_different_rewards(mdp):  # You can add more input parameters 
         
         mdp.board = deepcopy(new_board)
         U = [[0.0 for _ in range(cols)] for _ in range(rows)]
-        U = value_iteration(mdp,U)
+        U = value_iteration(mdp,U,epsilon)
 
         if(R != -5.0):
             p_t = policy
             policy = get_all_policies(mdp,U, print=False, retP= True)
 
-            if ((p_t != policy) or R == 5.0): #meaning got to the right limit [FINAL PRINT] - not np.allclose(p_t,policy,equal_nan=True
-                print_Reward_limits(L,R - Decimal('0.01')*(R !=5.0) )
+            if ((p_t != policy) or R == 5.0): #meaning got to the right limit [FINAL PRINT] - not np.allclose(p_t,policy,equal_nan=True)
+                print_Reward_limits(L,R)# - Decimal('0.01')*(R !=5.0) )
                 mdp.print_policy(p_t)
                 L = R
                 if(R!=5.0):
-                    thresholds.append(float(R - Decimal('0.01')))  
+                    thresholds.append(float(R))# - Decimal('0.01')))  
         else:
             policy = get_all_policies(mdp,U, print=False, retP= True)
 
