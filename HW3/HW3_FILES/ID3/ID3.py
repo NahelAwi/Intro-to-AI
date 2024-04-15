@@ -29,23 +29,23 @@ class ID3:
         #  - You can use counts as a helper dictionary of label -> count, or implement something else.
 
         counts = class_counts(rows, labels)
-        impurity = 0.0
+        _entropy = 0.0
 
         # ====== YOUR CODE: ======
         raise NotImplementedError
         # ========================
 
-        return impurity
+        return _entropy
 
-    def info_gain(self, left, left_labels, right, right_labels, current_uncertainty):
+    def info_gain(self, left, left_labels, right, right_labels, current_info_gain=None):
         """
-        Calculate the information gain, as the uncertainty of the starting node, minus the weighted impurity of
+        Calculate the information gain, as the current_info_gain of the starting node, minus the weighted entropy of
         two child nodes.
         :param left: the left child rows.
         :param left_labels: the left child labels.
         :param right: the right child rows.
         :param right_labels: the right child labels.
-        :param current_uncertainty: the current uncertainty of the current node
+        :param current_info_gain: the current info_gain of the current node
         :return: the info gain for splitting the current node into the two children left and right.
         """
         # TODO:
@@ -140,7 +140,7 @@ class ID3:
         raise NotImplementedError
         # ========================
 
-    def predict_sample(self, row, node: DecisionNode or Leaf = None):
+    def predict_sample(self, row, node: DecisionNode | Leaf = None):
         """
         Predict the most likely class for single sample in subtree of the given node.
         :param row: vector of shape (1,D).
