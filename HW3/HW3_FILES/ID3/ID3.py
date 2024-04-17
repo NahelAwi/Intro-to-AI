@@ -32,7 +32,11 @@ class ID3:
         _entropy = 0.0
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError
+        n = len(rows)
+        for count in counts.values():
+            if (count != 0):
+                probability = count / n
+                _entropy -= probability * np.log2(probability)
         # ========================
 
         return _entropy

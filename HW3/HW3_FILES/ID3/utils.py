@@ -42,10 +42,11 @@ def accuracy(y: np.array, y_pred: np.array):
     assert y.ndim == 1
 
     # ====== YOUR CODE: ======
-    right_pred = 0
+    right_pred = 0.0
+    accuracy_val = 0.0
     for index in range(len(y)):
         if(y[index] == y_pred[index]):
-            right_pred += 1
+            right_pred += 1.0
     accuracy_val = (right_pred/len(y))
     # ========================
 
