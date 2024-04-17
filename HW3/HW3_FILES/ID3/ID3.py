@@ -59,8 +59,16 @@ class ID3:
             'The split of current node is not right, rows size should be equal to labels size.'
 
         info_gain_value = 0.0
-        # ====== YOUR CODE: ======
-        raise NotImplementedError
+        # ====== YOUR CODE: ====== 
+        if(current_info_gain == None):
+            info_gain_value = self.entropy(np.concatenate((left,right)),np.concatenate((left_labels+right_labels)))
+            return info_gain_value
+        sum_left = len(left) 
+        sum_right = len(right)
+        sum_examples =  sum_left + sum_right
+        left_entropy = self.entropy(left,left_labels)
+        right_entropy = self.entropy(right, right_labels)
+        info_gain_value = current_info_gain - (sum_left/sum_examples)*left_entropy - (sum_right/sum_examples)*right_entropy
         # ========================
 
         return info_gain_value
