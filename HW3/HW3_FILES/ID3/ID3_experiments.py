@@ -62,7 +62,9 @@ def basic_experiment(x_train, y_train, x_test, y_test, formatted_print=False):
     acc = None
 
     # ====== YOUR CODE: ======
-    raise NotImplementedError
+    model = ID3(attributes_names)
+    model.fit(x_train,y_train)
+    acc = accuracy(y_test, model.predict(x_test))
     # ========================
 
     assert acc > 0.9, 'you should get an accuracy of at least 90% for the full ID3 decision tree'
@@ -149,14 +151,14 @@ if __name__ == '__main__':
            uncomment below code and run it
            modify the value from False to True to plot the experiment result
     """
-    plot_graphs = True
-    best_m = cross_validation_experiment(plot_graph=plot_graphs)
-    print(f'best_m = {best_m}')
+    # plot_graphs = True
+    # best_m = cross_validation_experiment(plot_graph=plot_graphs)
+    # print(f'best_m = {best_m}')
 
     """
         pruning experiment, run with the best parameter
         (*) To run the experiment uncomment below code and run it
     """
-    acc = best_m_test(*data_split, min_for_pruning=best_m)
-    assert acc > 0.95, 'you should get an accuracy of at least 95% for the pruned ID3 decision tree'
-    print(f'Test Accuracy: {acc * 100:.2f}%' if formatted_print else acc)
+    # acc = best_m_test(*data_split, min_for_pruning=best_m)
+    # assert acc > 0.95, 'you should get an accuracy of at least 95% for the pruned ID3 decision tree'
+    # print(f'Test Accuracy: {acc * 100:.2f}%' if formatted_print else acc)

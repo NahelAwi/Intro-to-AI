@@ -130,7 +130,9 @@ class ID3:
         # ====== YOUR CODE: ======
         features = len(rows[0])
         for feature in range(features):
-            column = unique_vals(rows, feature)
+            column = []
+            for row in rows:
+                column.append(row[feature])
             for i in range(len(column) - 1):
                 question = Question(column, feature, (column[i] + column[i + 1]) / 2)
                 gain, true_rows, true_labels, false_rows, false_labels = self.partition(rows, labels, question, current_uncertainty)
@@ -221,9 +223,10 @@ class ID3:
         y_pred = None
 
         # ====== YOUR CODE: ======
-        y_pred = []
+        arr = []
         for row in rows:
-            y_pred.append(self.predict_sample(row,self.tree_root))
+            arr.append(self.predict_sample(row,self.tree_root))
+        y_pred = np.array(arr)
         # ========================
 
         return y_pred
