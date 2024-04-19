@@ -181,7 +181,7 @@ class ID3:
         # TODO: Build the tree that fits the input data and save the root to self.tree_root
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError
+        self.tree_root = self.build_tree(x_train,y_train)
         # ========================
 
     def predict_sample(self, row, node: DecisionNode | Leaf = None):
@@ -199,7 +199,12 @@ class ID3:
         prediction = None
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError
+        while(not isinstance(node,Leaf)):
+            if(node.question.match(row)):
+                node = node.true_branch
+            else:
+                node = node.false_branch
+        prediction = max(node.predictions)#TODO check ,key=node.predictions.get)
         # ========================
 
         return prediction
@@ -216,7 +221,9 @@ class ID3:
         y_pred = None
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError
+        y_pred = []
+        for row in rows:
+            y_pred.append(self.predict_sample(row,self.tree_root))
         # ========================
 
         return y_pred
