@@ -1,6 +1,6 @@
 import math
 
-from DecisonTree import Leaf, Question, DecisionNode, class_counts
+from DecisonTree import Leaf, Question, DecisionNode, class_counts, unique_vals
 from utils import *
 
 """
@@ -128,7 +128,19 @@ class ID3:
         current_uncertainty = self.entropy(rows, labels)
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError
+        features = len(rows[0])
+        for feature in range(features):
+            column = unique_vals(rows, feature)
+            for i in range(len(column) - 1):
+                question = Question(column, feature, (column[i] + column[i + 1]) / 2)
+                gain, true_rows, true_labels, false_rows, false_labels = self.partition(rows, labels, question, current_uncertainty)
+                if gain > best_gain:
+                    best_gain = gain
+                    best_question = question
+                    best_true_rows = true_rows
+                    best_true_labels = true_labels
+                    best_false_rows = false_rows
+                    best_false_labels = false_labels
         # ========================
 
         return best_gain, best_question, best_true_rows, best_true_labels, best_false_rows, best_false_labels
@@ -150,7 +162,12 @@ class ID3:
         true_branch, false_branch = None, None
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError
+        if self.entropy(rows, labels) == 0 or len(rows) <= self.min_for_pruning:
+            return Leaf(rows, labels)
+        else:
+            best_gain, best_question, best_true_rows, best_true_labels, best_false_rows, best_false_labels = self.find_best_split(rows,labels)
+            true_branch = self.build_tree(best_true_rows,best_true_labels)
+            false_branch = self.build_tree(best_false_rows,best_false_labels)
         # ========================
 
         return DecisionNode(best_question, true_branch, false_branch)
