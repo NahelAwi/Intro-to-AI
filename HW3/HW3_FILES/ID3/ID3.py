@@ -60,15 +60,16 @@ class ID3:
 
         info_gain_value = 0.0
         # ====== YOUR CODE: ====== 
+        sum_left = len(left) 
+        sum_right = len(right)
+        sum_examples =  sum_left + sum_right
         if(current_info_gain == None):
-            info_gain_value = self.entropy(np.concatenate((left,right)),np.concatenate((left_labels,right_labels)))
+            info_gain_value = self.entropy(np.concatenate((left,right)),np.concatenate((left_labels,right_labels)))/sum_examples
         else:
-            sum_left = len(left) 
-            sum_right = len(right)
-            sum_examples =  sum_left + sum_right
             left_entropy = self.entropy(left,left_labels)
             right_entropy = self.entropy(right, right_labels)
             info_gain_value = current_info_gain - (sum_left/sum_examples)*left_entropy - (sum_right/sum_examples)*right_entropy
+            #NAWAF => info_gain_value /= len(left) + len(right)
         # ========================
 
         return info_gain_value
@@ -91,7 +92,21 @@ class ID3:
         assert len(rows) == len(labels), 'Rows size should be equal to labels size.'
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError
+        gain = 0
+        true_rows = []
+        true_labels = [] 
+        false_rows = []
+        false_labels = []
+
+        for row, label in zip(rows, labels):
+            if question.match(row):
+                true_rows.append(row)
+                true_labels.append(label)
+            else:
+                false_rows.append(row)
+                false_labels.append(label)
+        
+        gain = self.info_gain(true_rows, true_labels, false_rows, false_labels, current_uncertainty)
         # ========================
 
         return gain, true_rows, true_labels, false_rows, false_labels
