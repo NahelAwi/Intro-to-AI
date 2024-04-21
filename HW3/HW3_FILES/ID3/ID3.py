@@ -63,13 +63,13 @@ class ID3:
         sum_left = len(left) 
         sum_right = len(right)
         sum_examples =  sum_left + sum_right
-        if(current_info_gain == None):
-            info_gain_value = self.entropy(np.concatenate((left,right)),np.concatenate((left_labels,right_labels))) #TODO CHECK/sum_examples
-        else:
-            left_entropy = self.entropy(left,left_labels)
-            right_entropy = self.entropy(right, right_labels)
-            info_gain_value = current_info_gain - (sum_left/sum_examples)*left_entropy - (sum_right/sum_examples)*right_entropy
-            #TODO check NAWAF => info_gain_value /= len(left) + len(right)
+        # if(current_info_gain == None):
+        #     info_gain_value = self.entropy(np.concatenate((left,right)),np.concatenate((left_labels,right_labels))) #TODO CHECK/sum_examples
+        # else:
+        left_entropy = self.entropy(left,left_labels)
+        right_entropy = self.entropy(right, right_labels)
+        info_gain_value = current_info_gain - (sum_left/sum_examples)*left_entropy - (sum_right/sum_examples)*right_entropy
+        #info_gain_value /= len(left) + len(right) #TODO check NAWAF => 
         # ========================
 
         return info_gain_value
@@ -206,7 +206,7 @@ class ID3:
                 node = node.true_branch
             else:
                 node = node.false_branch
-        prediction = max(node.predictions)#TODO check ,key=node.predictions.get)
+        prediction = max(node.predictions,key=node.predictions.get) 
         # ========================
 
         return prediction
